@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoCoder Quest - Game Edukasi Pengelolaan Sampah & Algoritma</title>
+    <meta name="description" content="EcoCoder Quest adalah game puzzle berbasis web edukasi dasar algoritma dan pemilahan sampah untuk siswa SMP. Susun blok logika dan bantu Rina membersihkan lingkungan!">
+    
+    <!-- Google Fonts: Quicksand & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app-root">
+        <!-- Top Navigation & Header -->
+        <header class="game-header">
+            <div class="header-brand">
+                <img src="assets/mascot.jpg" alt="Logo Koko" class="brand-mascot-img">
+                <div class="brand-text">
+                    <h1 class="game-title">EcoCoder <span class="title-highlight">Quest</span></h1>
+                    <span class="game-tagline">Pilah Sampah & Kuasai Algoritma!</span>
+                </div>
+            </div>
+
+            <div class="header-level-badge">
+                <span class="badge-num" id="level-title">Level 1: Langkah Pertama</span>
+                <span class="badge-concept" id="level-concept">Sekuens Dasar</span>
+                <div class="level-stars" id="level-stars-display">
+                    <span class="star-icon star-empty">★</span>
+                    <span class="star-icon star-empty">★</span>
+                    <span class="star-icon star-empty">★</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button id="btn-open-levels" class="btn-icon-label" title="Pilih Level Permainan">
+                    <span class="btn-icon">🗺️</span>
+                    <span class="btn-text">Level</span>
+                </button>
+                <button id="btn-open-hint" class="btn-icon-label btn-hint" title="Buka Petunjuk">
+                    <span class="btn-icon">💡</span>
+                    <span class="btn-text">Petunjuk</span>
+                </button>
+                <button id="btn-toggle-numbers" class="btn-icon-toggle active" title="Tampilkan/Sembunyikan Nomor Petak">
+                    <span class="btn-icon">🔢</span>
+                </button>
+                <button id="btn-toggle-audio" class="btn-icon-toggle" title="Suara & Musik">
+                    <span class="btn-icon">🔊</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Game Container -->
+        <main class="game-container">
+            <!-- Left Side: Interactive Board Section -->
+            <section class="board-section">
+                <!-- Mascot Dialogue Bubble -->
+                <div class="mascot-dialog-wrapper">
+                    <div class="mascot-avatar-container">
+                        <img src="assets/mascot.jpg" alt="Maskot Koko" class="mascot-portrait" id="mascot-avatar">
+                        <span class="mascot-nametag">Koko</span>
+                    </div>
+                    <div class="mascot-bubble pop-anim" id="mascot-bubble">
+                        Halo! Aku Koko! 🌿 Ayo bantu Rina mengumpulkan sampah di taman dan membuangnya ke tempat yang tepat!
+                    </div>
+                </div>
+
+                <!-- 5x5 Game Board Frame -->
+                <div class="board-frame-container">
+                    <div class="board-outer-wrapper">
+                        <div class="board-grid" id="board-grid">
+                            <!-- 25 Cells generated dynamically via JS in 5x5 zig-zag format -->
+                        </div>
+
+                        <!-- Player Character Sprite Layer -->
+                        <div id="player-character" class="player-character">
+                            <div class="player-avatar-ring">
+                                <img src="assets/rina.jpg" alt="Rina" class="character-img">
+                                <div class="player-dir-arrow">▲</div>
+                            </div>
+                            <!-- Floating Carried Trash Indicator -->
+                            <div id="carried-badge" class="carried-badge hidden"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Board Legend & Speed Controls -->
+                <div class="board-footer-bar">
+                    <div class="legend-group">
+                        <span class="legend-item"><span class="legend-pill org-pill">🟢 Organik</span></span>
+                        <span class="legend-item"><span class="legend-pill inorg-pill">🔵 Anorganik</span></span>
+                        <span class="legend-item"><span class="legend-pill stone-pill">🪨 Rintangan</span></span>
+                    </div>
+                    <div class="speed-control-group">
+                        <span class="speed-label">Kecepatan:</span>
+                        <div class="speed-pills">
+                            <button class="speed-pill active" data-speed="1">1x</button>
+                            <button class="speed-pill" data-speed="2">2x</button>
+                            <button class="speed-pill" data-speed="3">3x</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Coding IDE Workspace & Toolbox -->
+            <section class="coding-section">
+                <!-- Action Controls Bar -->
+                <div class="execution-bar">
+                    <div class="block-counter" id="block-count-badge">
+                        <span class="count-num">0</span>
+                        <span class="count-label">Blok</span>
+                        <span class="count-opt">(Target ⭐⭐⭐: ≤ 6)</span>
+                    </div>
+
+                    <div class="exec-buttons">
+                        <button id="btn-run-program" class="btn-action btn-run">
+                            <span class="btn-icon">▶️</span>
+                            <span class="btn-label">Jalankan</span>
+                        </button>
+                        <button id="btn-reset-board" class="btn-action btn-reset" title="Reset posisi papan tanpa menghapus program">
+                            <span class="btn-icon">🔄</span>
+                            <span class="btn-label">Reset</span>
+                        </button>
+                        <button id="btn-clear-workspace" class="btn-action btn-clear" title="Bersihkan semua blok di area program">
+                            <span class="btn-icon">🗑️</span>
+                            <span class="btn-label">Hapus</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="coding-workspace-grid">
+                    <!-- Palet Blok Perintah (Toolbox) -->
+                    <div class="toolbox-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">📦 Blok Perintah</h3>
+                            <span class="panel-hint">Ketuk atau seret ke area program</span>
+                        </div>
+                        
+                        <div class="toolbox-items-list">
+                            <!-- Block 1: Maju -->
+                            <div class="toolbox-item block-move" data-type="move">
+                                <span class="block-icon">➡️</span>
+                                <div class="block-info">
+                                    <span class="block-title">Maju 1 langkah</span>
+                                    <span class="block-sub">Sekuens</span>
+                                </div>
+                                <span class="block-add-btn">+</span>
+                            </div>
+
+                            <!-- Block 2: Putar Kanan -->
+                            <div class="toolbox-item block-turn_right" data-type="turn_right">
+                                <span class="block-icon">↻</span>
+                                <div class="block-info">
+                                    <span class="block-title">Putar kanan 90°</span>
+                                    <span class="block-sub">Arah Hadap</span>
+                                </div>
+                                <span class="block-add-btn">+</span>
+                            </div>
+
+                            <!-- Block 3: Putar Kiri -->
+                            <div class="toolbox-item block-turn_left" data-type="turn_left">
+                                <span class="block-icon">↺</span>
+                                <div class="block-info">
+                                    <span class="block-title">Putar kiri 90°</span>
+                                    <span class="block-sub">Arah Hadap</span>
+                                </div>
+                                <span class="block-add-btn">+</span>
+                            </div>
+
+                            <!-- Block 4: Ambil Sampah -->
+                            <div class="toolbox-item block-pickup" data-type="pickup">
+                                <span class="block-icon">🤲</span>
+                                <div class="block-info">
+                                    <span class="block-title">Ambil sampah</span>
+                                    <span class="block-sub">Petak Sekarang</span>
+                                </div>
+                                <span class="block-add-btn">+</span>
+                            </div>
+
+                            <!-- Block 5: Letakkan Sampah -->
+                            <div class="toolbox-item block-drop" data-type="drop">
+                                <span class="block-icon">📥</span>
+                                <div class="block-info">
+                                    <span class="block-title">Letakkan sampah</span>
+                                    <span class="block-sub">Ke Tong Sampah</span>
+                                </div>
+                                <span class="block-add-btn">+</span>
+                            </div>
+
+                            <!-- Block 6: Ulangi ... kali -->
+                            <div class="toolbox-item block-repeat" data-type="repeat">
+                                <span class="block-icon">🔁</span>
+                                <div class="block-info">
+                                    <span class="block-title">Ulangi ... kali</span>
+                                    <span class="block-sub">Perulangan (Loop)</span>
+                                </div>
+                                <span class="block-add-btn">+</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Area Program (Workspace Dropzone) -->
+                    <div class="workspace-panel" id="workspace-dropzone">
+                        <div class="panel-header">
+                            <h3 class="panel-title">💻 Area Program (Algoritma Rina)</h3>
+                            <span class="panel-hint">Disusun berurutan dari atas ke bawah</span>
+                        </div>
+
+                        <div class="workspace-blocks-container" id="workspace-blocks">
+                            <!-- Populated with blocks dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- MODAL: Level Selection -->
+        <div id="level-select-modal" class="modal-overlay hidden">
+            <div class="modal-card modal-levels">
+                <div class="modal-header">
+                    <h3 class="modal-title">🗺️ Pilih Level Petualangan</h3>
+                    <button class="modal-close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">Selesaikan setiap level untuk membuka level selanjutnya dan kumpulkan 3 bintang!</p>
+                    <div class="level-cards-grid" id="level-cards-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Hint (3 Tiers) -->
+        <div id="hint-modal" class="modal-overlay hidden">
+            <div class="modal-card modal-hint">
+                <div class="modal-header">
+                    <h3 class="modal-title">💡 Petunjuk Pemecahan Masalah</h3>
+                    <button class="modal-close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="hint-content-list" class="hint-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action modal-close-btn">Tutup & Coba Sendiri</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Win Celebration & Eco Education Card -->
+        <div id="win-modal" class="modal-overlay hidden">
+            <div class="modal-card modal-win celebration-glow">
+                <div class="modal-win-banner">
+                    <img src="assets/banner.jpg" alt="Taman Bersih" class="win-banner-img">
+                    <div class="win-banner-overlay">
+                        <span class="win-sparkle-pill">🎉 MISI BERHASIL!</span>
+                        <h2 class="win-hero-title">Taman Bersih & Rapi!</h2>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="win-stars-wrapper" id="win-stars-container">
+                        <span class="win-star earned">★</span>
+                        <span class="win-star earned">★</span>
+                        <span class="win-star earned">★</span>
+                    </div>
+
+                    <div class="win-stats-grid">
+                        <div class="win-stat-box">
+                            <span class="stat-lbl">Efisiensi Algoritma</span>
+                            <strong class="stat-val" id="win-blocks-stat">6 Blok (Target: 6)</strong>
+                        </div>
+                        <div class="win-stat-box">
+                            <span class="stat-lbl">Langkah Eksekusi</span>
+                            <strong class="stat-val" id="win-steps-stat">6 Langkah</strong>
+                        </div>
+                    </div>
+
+                    <!-- Eco Education Card -->
+                    <div class="win-eco-card" id="win-eco-card">
+                        <!-- Populated dynamically with fun facts & 3R tips -->
+                    </div>
+                </div>
+
+                <div class="modal-footer win-footer-buttons">
+                    <button id="btn-win-replay" class="btn-win-secondary">🔄 Ulangi Level</button>
+                    <button id="btn-win-levels" class="btn-win-secondary">🗺️ Daftar Level</button>
+                    <button id="btn-win-next-level" class="btn-win-primary">Lanjut Level Berikutnya ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Failure / Debugging Guide -->
+        <div id="fail-modal" class="modal-overlay hidden">
+            <div class="modal-card modal-fail">
+                <div class="modal-header header-fail">
+                    <div class="fail-avatar-wrap">
+                        <img src="assets/mascot.jpg" alt="Koko Sedih" class="fail-mascot-img">
+                    </div>
+                    <div class="fail-header-text">
+                        <h3 class="modal-title text-fail">Ups, Ada Sedikit Kesalahan! 🧐</h3>
+                        <span class="fail-sub">Dalam pemrograman, kesalahan (bug) adalah hal wajar. Yuk perbaiki!</span>
+                    </div>
+                    <button class="modal-close-btn">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="fail-message-box">
+                        <p id="fail-message-text" class="fail-text">Pesan kesalahan akan muncul di sini.</p>
+                    </div>
+                    <div class="debugging-tip-box">
+                        <span class="debug-icon">🔍</span>
+                        <p class="debug-text"><strong>Tips Debugging:</strong> Periksa urutan blok instruksimu atau gunakan tombol petunjuk jika memerlukan bantuan rute.</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="btn-fail-hint" class="btn-fail-secondary">💡 Buka Petunjuk</button>
+                    <button id="btn-fail-retry" class="btn-fail-primary">Perbaiki Kode ➔</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/levels.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
