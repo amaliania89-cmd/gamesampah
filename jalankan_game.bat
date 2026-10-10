@@ -1,12 +1,11 @@
 @echo off
-chcp 65001 >nul
 title EcoCoder Quest - Game Server
 color 0B
 
 cd /d "%~dp0"
 
 echo =====================================================================
-echo              🌿 MENJALANKAN ECOCODER QUEST SERVER 🌿
+echo                MENJALANKAN ECOCODER QUEST SERVER
 echo =====================================================================
 echo.
 echo Server aktif di : http://localhost:8080/index.html

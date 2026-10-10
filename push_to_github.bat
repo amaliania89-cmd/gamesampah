@@ -1,9 +1,9 @@
 @echo off
-chcp 65001 >nul
+setlocal EnableDelayedExpansion
 title EcoCoder Quest - GitHub Push Tool
 color 0A
 
-:: Tambahkan direktori Git ke PATH untuk sesi ini
+:: Set Git Path to user programs directory
 set "GIT_PATH=C:\Users\MyBook Pro L\AppData\Local\Programs\Git\cmd"
 if exist "%GIT_PATH%\git.exe" (
     set "PATH=%GIT_PATH%;%PATH%"
@@ -14,31 +14,30 @@ cd /d "%~dp0"
 :MENU
 cls
 echo =====================================================================
-echo           🌿 ECOCODER QUEST - GITHUB PUSH & SYNC TOOL 🌿
+echo                ECOCODER QUEST - GITHUB PUSH TOOL
 echo =====================================================================
 echo.
 echo Repositori Target : https://github.com/amaliania89-cmd/gamesampah.git
 echo Branch            : main
-echo Status Git        :
-git status --short
 echo.
 echo ---------------------------------------------------------------------
 echo PILIH TINDAKAN:
-echo [1] Push ke GitHub menggunakan Personal Access Token (PAT) [Direkomendasikan]
-echo [2] Push Standar (Buka jendela login GitHub biasa)
+echo [1] Push ke GitHub menggunakan Personal Access Token (PAT)
+echo [2] Push Standar (Login GitHub)
 echo [3] Buka Halaman Buat Token GitHub di Browser
-echo [4] Buka Repositori gamesampah di Browser
-echo [5] Cek Status Commit & Log Git
+echo [4] Buka Repositori di Browser
+echo [5] Cek Status Git
 echo [0] Keluar
 echo ---------------------------------------------------------------------
-set /p pilihan="Masukkan pilihan (0-5): "
+set "pilihan="
+set /p "pilihan=Masukkan pilihan (0-5): "
 
 if "%pilihan%"=="1" goto PUSH_TOKEN
 if "%pilihan%"=="2" goto PUSH_STANDARD
 if "%pilihan%"=="3" goto OPEN_TOKEN_PAGE
 if "%pilihan%"=="4" goto OPEN_REPO
 if "%pilihan%"=="5" goto CHECK_LOG
-if "%pilihan%"=="0" exit
+if "%pilihan%"=="0" goto KELUAR
 goto MENU
 
 :PUSH_TOKEN
@@ -47,12 +46,14 @@ echo =====================================================================
 echo       PUSH KE GITHUB MENGGUNAKAN PERSONAL ACCESS TOKEN (PAT)
 echo =====================================================================
 echo.
-echo Catatan: Sejak 2021, GitHub mewajibkan Personal Access Token (bukan password biasa).
-echo Jika belum punya token:
-echo 1. Pilih opsi [3] di menu utama untuk membuat token baru (centang izin "repo").
-echo 2. Copy token tersebut (contoh: ghp_xxxxxxxxxxxx) lalu paste di bawah.
+echo Catatan: GitHub mewajibkan Personal Access Token sebagai password.
+echo Jika belum memiliki token:
+echo 1. Pilih opsi [3] pada menu untuk membuat token di browser.
+echo 2. Beri centang pada izin 'repo'.
+echo 3. Salin (copy) token tersebut lalu tempel (paste) di bawah.
 echo.
-set /p TOKEN="Masukkan Personal Access Token GitHub kamu: "
+set "TOKEN="
+set /p "TOKEN=Masukkan Personal Access Token GitHub kamu: "
 
 if "%TOKEN%"=="" (
     echo.
@@ -72,23 +73,23 @@ git push https://amaliania89-cmd:%TOKEN%@github.com/amaliania89-cmd/gamesampah.g
 if %ERRORLEVEL% equ 0 (
     echo.
     echo =====================================================================
-    echo    🎉 BERHASIL! Website EcoCoder Quest telah ter-push ke GitHub!
+    echo    BERHASIL! Website EcoCoder Quest telah ter-push ke GitHub!
     echo =====================================================================
-    echo Silakan cek repositori di: https://github.com/amaliania89-cmd/gamesampah
+    echo Repositori: https://github.com/amaliania89-cmd/gamesampah
     echo.
 ) else (
     echo.
     echo =====================================================================
-    echo    ❌ GAGAL PUSH KE GITHUB
+    echo    GAGAL PUSH KE GITHUB
     echo =====================================================================
     echo Kemungkinan penyebab:
     echo 1. Token salah atau sudah kadaluarsa (expired).
-    echo 2. Token belum memiliki izin centang 'repo' (Full control of private repositories).
+    echo 2. Token belum memiliki izin centang 'repo'.
     echo 3. Koneksi internet terganggu.
     echo.
 )
 
-:: Pastikan remote origin tetap bersih tanpa menyimpan token di teks konfigurasi
+:: Kembalikan remote origin tanpa token
 git remote set-url origin https://github.com/amaliania89-cmd/gamesampah.git
 pause
 goto MENU
@@ -99,7 +100,7 @@ echo =====================================================================
 echo                      PUSH DENGAN METODE STANDAR
 echo =====================================================================
 echo.
-echo Menyiapkan commit terbaru...
+echo Menyiapkan commit...
 git add .
 git commit -m "update: update EcoCoder Quest" >nul 2>&1
 
@@ -108,10 +109,10 @@ git push -u origin main
 
 if %ERRORLEVEL% equ 0 (
     echo.
-    echo 🎉 Berhasil ter-push ke GitHub!
+    echo Berhasil ter-push ke GitHub!
 ) else (
     echo.
-    echo ❌ Gagal melakukan push standar. Silakan coba opsi [1] menggunakan Token.
+    echo Gagal melakukan push standar. Silakan gunakan Opsi [1] dengan Token.
 )
 echo.
 pause
@@ -141,10 +142,16 @@ goto MENU
 :CHECK_LOG
 cls
 echo =====================================================================
-echo                         LOG COMMIT GIT
+echo                         STATUS GIT
 echo =====================================================================
 echo.
-git log -n 5 --oneline --graph --decorate
+git status
+echo.
+echo Log Commit:
+git log -n 5 --oneline
 echo.
 pause
 goto MENU
+
+:KELUAR
+exit
